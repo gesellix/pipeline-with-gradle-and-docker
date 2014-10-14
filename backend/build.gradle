@@ -1,0 +1,47 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+  dependencies {
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+  }
+}
+
+apply plugin: 'spring-boot'
+apply plugin: 'versions'
+
+dependencies {
+  compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+  compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+  compile("org.springframework:spring-beans:$springVersion")
+  compile("org.springframework:spring-context:$springVersion")
+  compile("org.springframework:spring-web:$springVersion")
+  compile("org.springframework:spring-webmvc:$springVersion")
+
+  compile("org.springframework.security:spring-security-core:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-config:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-web:$springSecurityVersion")
+
+  compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jacksonVersion"
+  compile 'ch.qos.logback:logback-access:1.1.2'
+
+  compile('org.ektorp:org.ektorp:1.4.2')
+
+  compile("javax.mail:mail:1.4.7")
+
+  testCompile("org.easytesting:fest-assert:1.4")
+  testCompile("org.mockito:mockito-all:1.9.5")
+  testCompile("org.testng:testng:6.8.8")
+
+  compile project(':common')
+}
+
+processResources {
+  filter ReplaceTokens, tokens: ['example.version': artifactVersion]
+}
+
+// notwendig, wenn 'publish' ohne vorheriges 'build' aufgerufen wird
+tasks.publish.dependsOn bootRepackage
+
+test {
+  systemProperties = System.properties
+}

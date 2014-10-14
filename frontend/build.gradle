@@ -1,0 +1,93 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+  repositories {
+    mavenLocal()
+    jcenter()
+    maven {
+      url project["nexus.public.url"]
+      credentials {
+        username project["nexus.username"]
+        password project["nexus.password"]
+      }
+    }
+  }
+
+  dependencies {
+    classpath 'com.moowork.gradle:gradle-grunt-plugin:0.5'
+    classpath 'com.moowork.gradle:gradle-node-plugin:0.5'
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+    classpath 'de.undercouch:gradle-download-task:1.0'
+  }
+}
+
+apply plugin: 'grunt'
+apply plugin: 'spring-boot'
+apply plugin: 'versions'
+apply plugin: 'download-task'
+apply plugin: 'versions'
+
+
+dependencies {
+  compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+  compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+  compile("org.springframework:spring-beans:$springVersion")
+  compile("org.springframework:spring-context:$springVersion")
+  compile("org.springframework:spring-web:$springVersion")
+  compile("org.springframework:spring-webmvc:$springVersion")
+
+  compile("org.springframework.security:spring-security-core:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-config:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-web:$springSecurityVersion")
+
+  compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jacksonVersion"
+  compile 'ch.qos.logback:logback-access:1.1.2'
+
+  compile project(':common')
+}
+
+node {
+  version = '0.10.32'
+  download = true
+}
+
+task grunt_release(type: GruntTask) {
+  args = ['release', '--no-color']
+}
+
+def gruntfile = "$projectDir/Gruntfile.js"
+def gruntSourceDir = "$projectDir/src"
+def gruntBuildDir = "$buildDir/grunt"
+
+clean.dependsOn grunt_clean
+build.dependsOn grunt_release
+jar.dependsOn grunt_release
+
+grunt_release {
+  inputs.files {
+    fileTree(dir: gruntSourceDir)
+    file(gruntfile)
+  }
+  outputs.files {
+    fileTree(dir: gruntBuildDir)
+  }
+}
+grunt_release.dependsOn 'npmInstall'
+grunt_release.dependsOn 'installGrunt'
+
+// notwendig, wenn 'publish' ohne vorheriges 'build' aufgerufen wird
+tasks.publish.dependsOn bootRepackage
+
+jar {
+  into('public') {
+    from grunt_release.outputs.files
+  }
+}
+
+processResources {
+  filter ReplaceTokens, tokens: ['example.version': artifactVersion]
+}
+
+springBoot {
+  mainClass = "org.hypoport.example.frontend.FrontendApplication"
+}

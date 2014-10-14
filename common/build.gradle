@@ -1,0 +1,25 @@
+apply plugin: 'versions'
+
+dependencies {
+  compile("com.codahale.metrics:metrics-core:$metricsVersion")
+  compile("com.ryantenney.metrics:metrics-spring:3.0.2")
+  compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+  compile("org.springframework:spring-beans:$springVersion")
+  compile("org.springframework:spring-context:$springVersion")
+  compile("org.springframework:spring-web:$springVersion")
+  compile("org.springframework:spring-webmvc:$springVersion")
+  compile("org.springframework:spring-test:$springVersion")
+
+  compile("org.springframework.security:spring-security-core:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-config:$springSecurityVersion")
+  compile("org.springframework.security:spring-security-web:$springSecurityVersion")
+
+  compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jacksonVersion"
+
+  compile("org.easytesting:fest-assert:1.4")
+
+  testCompile("org.mockito:mockito-all:1.9.5")
+  testCompile("org.testng:testng:6.8.8")
+
+  compile("org.apache.httpcomponents:httpclient:4.3.4")
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>Example</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" type="text/css" href="lib/production/normalise/normalize.css">
+    <link rel="stylesheet" type="text/css" href="lib/production/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <base href="/example/"/>
+</head>
+
+<script type="text/javascript">
+    if (!window.console) {
+        window.console = {};
+    }
+    if (!window.console.log) {
+        window.console.log = function () {
+        };
+    }
+</script>
+
+<body ng-app="example-app">
+<div class="example" ng-view id="example"></div>
+<script src="lib/production/jquery/jquery-2.1.0.min.js"></script>
+<script src="lib/production/angular/angular.js"></script>
+<script src="lib/production/angular/i18n/angular-locale_de-de.js"></script>
+<script src="lib/production/angular/angular-resource.min.js"></script>
+<script src="lib/production/angular/angular-cookies.min.js"></script>
+<script src="lib/production/angular/angular-sanitize.min.js"></script>
+<script src="lib/production/angular/angular-messages.min.js"></script>
+<script src="lib/production/angular/angular-route.min.js"></script>
+<script src="lib/production/angular/angular-animate.min.js"></script>
+<script src="lib/production/lodash/lodash.compat.min.js"></script>
+<script src="lib/production/underscore/underscore.string.min.js"></script>
+
+<script src="app.js"></script>
+<!-- build:template:develop
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (!$('html').hasClass('lt-ie10')) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = '//' + window.location.hostname + ':35729/livereload.js';
+            $("body").append(script);
+        }
+    });
+</script>
+/build -->
+</body>
+</html>
