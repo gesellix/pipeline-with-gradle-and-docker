@@ -17,14 +17,12 @@ buildscript {
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.5'
     classpath 'com.moowork.gradle:gradle-node-plugin:0.5'
     classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
-    classpath 'de.undercouch:gradle-download-task:1.0'
   }
 }
 
 apply plugin: 'grunt'
 apply plugin: 'spring-boot'
 apply plugin: 'versions'
-apply plugin: 'download-task'
 apply plugin: 'versions'
 
 
