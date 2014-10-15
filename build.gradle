@@ -16,16 +16,11 @@ subprojects {
   buildscript {
     repositories {
       mavenLocal()
-      maven {
-        url project["nexus.public.url"]
-        credentials {
-          username project["nexus.username"]
-          password project["nexus.password"]
-        }
-      }
+      mavenCentral()
+      jcenter()
     }
     dependencies {
-      classpath 'com.github.ben-manes:gradle-versions-plugin:0.5-beta-5'
+      classpath 'com.github.ben-manes:gradle-versions-plugin:0.5'
     }
   }
 
@@ -39,13 +34,7 @@ subprojects {
 
   repositories {
     mavenLocal()
-    maven {
-      url project["nexus.public.url"]
-      credentials {
-        username project["nexus.username"]
-        password project["nexus.password"]
-      }
-    }
+    mavenCentral()
   }
 
   ext {

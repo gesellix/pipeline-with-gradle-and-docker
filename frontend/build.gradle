@@ -1,18 +1,6 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
-  repositories {
-    mavenLocal()
-    jcenter()
-    maven {
-      url project["nexus.public.url"]
-      credentials {
-        username project["nexus.username"]
-        password project["nexus.password"]
-      }
-    }
-  }
-
   dependencies {
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.5'
     classpath 'com.moowork.gradle:gradle-node-plugin:0.5'
