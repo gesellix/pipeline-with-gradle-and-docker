@@ -1,8 +1,24 @@
+import org.ajoberstar.grgit.Grgit
+
 import java.text.SimpleDateFormat
+
+buildscript {
+  repositories {
+    // jcenter()
+    mavenCentral()
+  }
+  dependencies {
+    //classpath 'org.ajoberstar:gradle-git:0.11.2'
+    classpath 'org.ajoberstar:grgit:0.3.1'
+  }
+}
 
 def langLevel = '1.7'
 
-ext.artifactVersion = newArtifactVersion()
+ext {
+  repo = Grgit.open(project.file('.'))
+  artifactVersion = newArtifactVersion()
+}
 
 task writeVersionInFile << {
   writeVersion(artifactVersion)
@@ -164,9 +180,7 @@ def newArtifactVersion() {
 }
 
 def lastCommitHash() {
-  def proc = "git rev-parse HEAD".execute([], projectDir)
-  proc.waitFor()
-  return "${proc.in.text}".trim()
+  return repo.head().id
 }
 
 def writeVersion(def version) {
