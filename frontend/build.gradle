@@ -10,8 +10,7 @@ buildscript {
 
 apply plugin: 'grunt'
 apply plugin: 'spring-boot'
-apply plugin: 'versions'
-apply plugin: 'versions'
+apply plugin: 'com.github.ben-manes.versions'
 
 
 dependencies {

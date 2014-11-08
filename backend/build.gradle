@@ -3,11 +3,12 @@ import org.apache.tools.ant.filters.ReplaceTokens
 buildscript {
   dependencies {
     classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+    //classpath 'com.github.ben-manes:gradle-versions-plugin:0.5'
   }
 }
 
 apply plugin: 'spring-boot'
-apply plugin: 'versions'
+apply plugin: 'com.github.ben-manes.versions'
 
 dependencies {
   compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")

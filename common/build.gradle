@@ -1,4 +1,4 @@
-apply plugin: 'versions'
+apply plugin: 'com.github.ben-manes.versions'
 
 dependencies {
   compile("com.codahale.metrics:metrics-core:$metricsVersion")
