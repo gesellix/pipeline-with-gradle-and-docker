@@ -2,8 +2,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
   dependencies {
-    classpath 'com.moowork.gradle:gradle-grunt-plugin:0.5'
-    classpath 'com.moowork.gradle:gradle-node-plugin:0.5'
+    classpath 'com.moowork.gradle:gradle-grunt-plugin:0.6'
+    classpath 'com.moowork.gradle:gradle-node-plugin:0.8'
     classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
   }
 }

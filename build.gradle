@@ -36,7 +36,7 @@ subprojects {
       jcenter()
     }
     dependencies {
-      classpath 'com.github.ben-manes:gradle-versions-plugin:0.5'
+      classpath 'com.github.ben-manes:gradle-versions-plugin:0.7'
     }
   }
 
@@ -54,7 +54,7 @@ subprojects {
   }
 
   ext {
-    springVersion = '4.1.1.RELEASE'
+    springVersion = '4.1.4.RELEASE'
     springBootVersion = '1.1.7.RELEASE'
     springSecurityVersion = '3.2.5.RELEASE'
     jacksonVersion = '2.4.1'
@@ -86,20 +86,20 @@ subprojects {
   def dependencyVersionsByGroup = [
       'org.apache.tomcat.embed'       : '8.0.12',
       'org.springframework'           : springVersion,
-      'org.codehaus.groovy'           : '2.3.6',
-      'org.slf4j'                     : '1.7.7',
+      'org.codehaus.groovy': '2.3.9',
+      'org.slf4j'          : '1.7.10',
       'com.fasterxml.jackson.core'    : jacksonVersion,
       'com.fasterxml.jackson.datatype': jacksonVersion
   ]
 
   dependencies {
-    compile('org.codehaus.groovy:groovy-all:2.3.6') {
+    compile('org.codehaus.groovy:groovy-all:2.3.9') {
       exclude group: 'org.junit', module: 'junit'
     }
     compile('commons-lang:commons-lang:2.6')
 
-    compile 'org.slf4j:slf4j-api:1.7.7'
-    runtime 'org.slf4j:log4j-over-slf4j:1.7.7'
+    compile 'org.slf4j:slf4j-api:1.7.10'
+    runtime 'org.slf4j:log4j-over-slf4j:1.7.10'
     runtime 'ch.qos.logback:logback-classic:1.1.2'
 
     compile("org.easytesting:fest-assert:1.4")
@@ -108,10 +108,10 @@ subprojects {
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     testCompile lib."spock-spring"
     testCompile 'cglib:cglib-nodep:3.1'
-    testCompile 'com.jayway.jsonpath:json-path:0.9.1'
-    testCompile 'com.jayway.jsonpath:json-path-assert:0.9.1'
-    testCompile 'junit:junit:4.11'
-    testCompile 'org.testng:testng:6.8.8'
+    testCompile 'com.jayway.jsonpath:json-path:1.2.0'
+    testCompile 'com.jayway.jsonpath:json-path-assert:1.2.0'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.testng:testng:6.8.17'
     testCompile 'javax.servlet:javax.servlet-api:3.1.0'
   }
 

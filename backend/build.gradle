@@ -31,7 +31,7 @@ dependencies {
 
   testCompile("org.easytesting:fest-assert:1.4")
   testCompile("org.mockito:mockito-all:1.9.5")
-  testCompile("org.testng:testng:6.8.8")
+  testCompile("org.testng:testng:6.8.17")
 
   compile project(':common')
 }
