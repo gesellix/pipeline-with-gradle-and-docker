@@ -1,0 +1,160 @@
+import java.util.concurrent.CountDownLatch
+
+buildscript {
+  dependencies {
+    classpath 'com.moowork.gradle:gradle-node-plugin:0.8'
+    classpath 'de.undercouch:gradle-download-task:1.2'
+  }
+}
+
+apply plugin: 'com.moowork.node'
+apply plugin: 'de.undercouch.download'
+apply plugin: 'com.github.ben-manes.versions'
+
+ext {
+  applicationVersion = 'UNDEFINED'
+
+  seleniumServer = null
+  nodeServer = null
+  appFrontend = null
+  appBackend = null
+}
+
+task readVersionFile << {
+  def applicationVersionFile = new File('application-version.txt')
+  if (!applicationVersionFile.exists()) {
+    throw new RuntimeException("No application version file found")
+  }
+  applicationVersion = applicationVersionFile.text.trim()
+  logger.warn "Using application version from file '${applicationVersionFile.name}': ${applicationVersion}"
+}
+
+task copyJars(dependsOn: [readVersionFile, ':frontend:build', ':backend:build']) {
+  doLast {
+    File explodedDist = mkdir("$buildDir/")
+    rootProject.subprojects.each { project ->
+      project.tasks.withType(Jar).each { archiveTask ->
+        copy {
+          from archiveTask.archivePath
+          into explodedDist
+        }
+      }
+    }
+//    download {
+//      src createNexusDownloadUrl('backend', applicationVersion, 'jar')
+//      dest "$buildDir/backend.jar"
+//    }
+//    download {
+//      src createNexusDownloadUrl('frontend', applicationVersion, 'jar')
+//      dest "$buildDir/frontend.jar"
+//    }
+  }
+}
+
+//def createNexusDownloadUrl(def artifactName, def artifactVersion, def type) {
+//  "${project["nexus.public.url"]}/${project["nexus.groupId"]}/$artifactName/$artifactVersion/$artifactName-${artifactVersion}.$type"
+//}
+
+def defaultEnvironment() {
+  def environment = ["PATH=${System.env.PATH}"]
+  environment += "HOME=${System.env.HOME}"
+  environment += "http_proxy=${System.env.http_proxy}"
+  environment += "https_proxy=${System.env.https_proxy}"
+  return environment
+}
+
+def execAsync(command, printStdOutput, environment, dir, output) {
+  logger.lifecycle "Starting async command $command"
+
+  final CountDownLatch condition = new CountDownLatch(1)
+
+  def commandEnvironment = defaultEnvironment() + environment as List
+  logger.lifecycle "environment: $commandEnvironment"
+
+  def proc = command.execute(commandEnvironment, new File(dir as String))
+  Thread.start {
+    try {
+      proc.in.eachLine { line ->
+        if (printStdOutput) {
+          println "$line"
+        }
+        if (output != null && line?.contains(output)) {
+          condition.countDown()
+        }
+      }
+    }
+    catch (ignored) {}
+  }
+  Thread.start {
+    try {
+      proc.err.eachLine { line ->
+        if (printStdOutput) {
+          println line
+        }
+      }
+    }
+    catch (ignored) {}
+  }
+  return [proc, output != null ? condition : null]
+}
+
+def execWithLogs(command, environment, dir, failBuild) {
+  logger.lifecycle "Execute command $command"
+
+  def commandEnvironment = defaultEnvironment() + environment as List
+  logger.lifecycle "environment: $commandEnvironment"
+
+  def proc = command.execute(commandEnvironment, new File(dir as String))
+  Thread.start {
+    try {
+      proc.in.eachLine { line -> println "$line" }
+    }
+    catch (ignored) {}
+  }
+  Thread.start {
+    try {
+      proc.err.eachLine { line -> println line }
+    }
+    catch (ignored) {}
+  }
+  def exitCode = proc.waitFor()
+  if (failBuild && exitCode != 0) {
+    println "Error: Exit-Code $exitCode for command $command"
+    throw new RuntimeException("Exit-Code $exitCode for command $command")
+  }
+}
+
+node {
+  version = '0.10.32'
+  download = true
+}
+
+task startSeleniumServer(dependsOn: npmInstall) {
+  doLast {
+    def seleniumStandaloneFiles = fileTree("$projectDir/node_modules/selenium-server-standalone-jar/jar")
+    def seleniumServerStandaloneLocation = seleniumStandaloneFiles.first().absolutePath
+    (seleniumServer) = execAsync("java -jar $seleniumServerStandaloneLocation -port 4449", false, [], "$projectDir", null)
+  }
+}
+
+task e2eTests(dependsOn: [copyJars, startSeleniumServer]) {
+  doLast {
+    (nodeServer) = execAsync("node e2e-reverse-proxy.js", true, [], "$projectDir", null)
+
+    def condBackend, condFrontend
+    (appBackend, condBackend) = execAsync(["java", "-jar", "$buildDir/backend.jar", "--spring.profiles.active=dev-stage"], true, [], "$projectDir", "Started BackendApplication")
+    (appFrontend, condFrontend) = execAsync(["java", "-jar", "$buildDir/frontend.jar", "--spring.profiles.active=dev-stage"], true, [], "$projectDir", "Started FrontendApplication")
+
+    condBackend.await()
+    condFrontend.await()
+    execWithLogs("node_modules/.bin/protractor ./protractor-conf-teamcity.js", [], "$projectDir", true)
+  }
+}
+
+task stopProcesses << {
+  appBackend?.destroy()
+  appFrontend?.destroy()
+  seleniumServer?.destroy()
+  nodeServer?.destroy()
+}
+e2eTests.finalizedBy stopProcesses

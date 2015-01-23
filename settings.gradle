@@ -1,4 +1,5 @@
 rootProject.name = 'gradle-with-docker'
 include 'backend',
         'common',
-        'frontend'
+        'frontend',
+        'e2e-tests'
