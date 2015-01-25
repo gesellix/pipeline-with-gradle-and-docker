@@ -7,4 +7,4 @@ Please use the comment feature on our articles for questions and feedback or con
 
 
 ... would you like to improve projects like this one? Well, you can use the GitHub issue tracker or create a pull request.
-If you'd like to improve more than our build scripts: [we're hiring](http://www.hypoport.de/index.php?id=42&jobID=4846&ref=28) :)
+If you'd like to improve more than our build scripts: [we're hiring](http://www.hypoport.de/stellenangebote.html) :)
