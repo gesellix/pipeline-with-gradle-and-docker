@@ -29,7 +29,8 @@ task readVersionFile << {
   logger.warn "Using application version from file '${applicationVersionFile.name}': ${applicationVersion}"
 }
 
-task copyJars(dependsOn: [readVersionFile, ':frontend:build', ':backend:build']) {
+// use webapps from the project's submodules
+task copyProjectJars(dependsOn: [readVersionFile, ':frontend:build', ':backend:build']) {
   doLast {
     File explodedDist = mkdir("$buildDir/")
     rootProject.subprojects.each { project ->
@@ -40,20 +41,31 @@ task copyJars(dependsOn: [readVersionFile, ':frontend:build', ':backend:build'])
         }
       }
     }
-//    download {
-//      src createNexusDownloadUrl('backend', applicationVersion, 'jar')
-//      dest "$buildDir/backend.jar"
-//    }
-//    download {
-//      src createNexusDownloadUrl('frontend', applicationVersion, 'jar')
-//      dest "$buildDir/frontend.jar"
-//    }
   }
 }
 
-//def createNexusDownloadUrl(def artifactName, def artifactVersion, def type) {
+// download webapps from an artifact repository
+task copyExternalJars(dependsOn: readVersionFile) {
+  doLast {
+    download {
+      src createDownloadUrl('backend', applicationVersion, 'jar')
+      dest "$buildDir/backend.jar"
+    }
+    download {
+      src createDownloadUrl('frontend', applicationVersion, 'jar')
+      dest "$buildDir/frontend.jar"
+    }
+  }
+}
+
+def createDownloadUrl(def artifactName, def artifactVersion, def type) {
+  def host = "https://github.com"
+  def projectPath = "gesellix/pipeline-with-gradle-and-docker"
+  def releasesPath = "releases/download"
+  def releaseTag = "example-apps-part3"
+  "${host}/${projectPath}/${releasesPath}/${releaseTag}/${artifactName}.${type}"
 //  "${project["nexus.public.url"]}/${project["nexus.groupId"]}/$artifactName/$artifactVersion/$artifactName-${artifactVersion}.$type"
-//}
+}
 
 def defaultEnvironment() {
   def environment = ["PATH=${System.env.PATH}"]
@@ -137,7 +149,10 @@ task startSeleniumServer(dependsOn: npmInstall) {
   }
 }
 
-task e2eTests(dependsOn: [copyJars, startSeleniumServer]) {
+// we normally use the "external" variant, but to make the example project
+// easier to follow and with less external dependencies, we use the project artifacts
+//task e2eTests(dependsOn: [copyExternalJars, startSeleniumServer]) {
+task e2eTests(dependsOn: [copyProjectJars, startSeleniumServer]) {
   doLast {
     (nodeServer) = execAsync("node e2e-reverse-proxy.js", true, [], "$projectDir", null)
 
