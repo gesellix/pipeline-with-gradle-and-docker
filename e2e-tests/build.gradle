@@ -75,7 +75,7 @@ def defaultEnvironment() {
   return environment
 }
 
-def execAsync(command, printStdOutput, environment, dir, output) {
+def execAsync(command, printStdOutput, environment, dir, expectedOutput) {
   logger.lifecycle "Starting async command $command"
 
   final CountDownLatch condition = new CountDownLatch(1)
@@ -90,7 +90,7 @@ def execAsync(command, printStdOutput, environment, dir, output) {
         if (printStdOutput) {
           println "$line"
         }
-        if (output != null && line?.contains(output)) {
+        if (expectedOutput != null && line?.contains(expectedOutput)) {
           condition.countDown()
         }
       }
@@ -107,7 +107,7 @@ def execAsync(command, printStdOutput, environment, dir, output) {
     }
     catch (ignored) {}
   }
-  return [proc, output != null ? condition : null]
+  return [proc, expectedOutput != null ? condition : null]
 }
 
 def execWithLogs(command, environment, dir, failBuild) {
