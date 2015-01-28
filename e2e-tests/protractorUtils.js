@@ -81,35 +81,6 @@ var expectNoBeforeunload = function () {
   expect(browser.driver.executeScript("var result =  (window.onbeforeunload != undefined) ? window.onbeforeunload():undefined; window.onbeforeunload =  function(){}; return result;")).toBeFalsy();
 };
 
-var reloadVorgang = function () {
-  var deferred = protractor.promise.defer();
-
-  writeLogs();
-  var vorgangsnummerElement = element(by.binding('vorgang.vorgangsnummer'));
-  vorgangsnummerElement.getText().then(function (vorgangsnummer) {
-    expectNoBeforeunload();
-    browser.get(browser.baseUrl + '?vorgangsnummer=' + vorgangsnummer);
-    deferred.fulfill(vorgangsnummer);
-  }, deferred.reject);
-
-  return deferred.promise;
-};
-
-browser.reloadVorgangAfterDebounce = function () {
-  var waitForDebounce = function () {
-    var debounceTimeout = 150;
-    return browser.driver.sleep(debounceTimeout);
-  };
-
-  var deferred = protractor.promise.defer();
-  waitForDebounce().then(function () {
-    deferred.fulfill(reloadVorgang());
-  }, deferred.reject);
-  return deferred.promise;
-};
-
-browser.reloadVorgang = reloadVorgang;
-
 // taken from http://eitanp461.blogspot.de/2014/01/advanced-protractor-features.html
 var dumpConsoleLog = function () {
 
@@ -154,5 +125,3 @@ browser.writeLogs = writeLogs;
 browser.dumpConsoleLog = dumpConsoleLog;
 
 browser.globalSetup = globalSetup;
-
-
