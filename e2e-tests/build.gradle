@@ -150,7 +150,7 @@ task startSeleniumServer(dependsOn: npmInstall) {
 }
 
 // we normally use the "external" variant, but to make the example project
-// easier to follow and with less external dependencies, we use the project artifacts
+// easier to follow and to have less external dependencies, we use the project artifacts
 //task e2eTests(dependsOn: [copyExternalJars, startSeleniumServer]) {
 task e2eTests(dependsOn: [copyProjectJars, startSeleniumServer]) {
   doLast {
