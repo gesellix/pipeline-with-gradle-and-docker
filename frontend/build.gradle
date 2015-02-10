@@ -57,8 +57,9 @@ grunt_release {
     fileTree(dir: gruntBuildDir)
   }
 }
-grunt_release.dependsOn 'npmInstall'
-grunt_release.dependsOn 'installGrunt'
+
+grunt_release.dependsOn installGrunt, npmInstall
+grunt_clean.dependsOn installGrunt, npmInstall
 
 // notwendig, wenn 'publish' ohne vorheriges 'build' aufgerufen wird
 tasks.publish.dependsOn bootRepackage
