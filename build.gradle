@@ -86,8 +86,8 @@ subprojects {
   def dependencyVersionsByGroup = [
       'org.apache.tomcat.embed'       : '8.0.12',
       'org.springframework'           : springVersion,
-      'org.codehaus.groovy': '2.3.9',
-      'org.slf4j'          : '1.7.10',
+      'org.codehaus.groovy'           : '2.3.9',
+      'org.slf4j'                     : '1.7.10',
       'com.fasterxml.jackson.core'    : jacksonVersion,
       'com.fasterxml.jackson.datatype': jacksonVersion
   ]
@@ -187,7 +187,6 @@ def writeVersion(def version) {
   println "Writing new version file"
   new File(rootDir.absolutePath + "/version.txt").write(version)
 }
-
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.1'
