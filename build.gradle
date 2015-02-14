@@ -161,15 +161,16 @@ subprojects {
   }
 
   test {
-    dependsOn testNG
     useJUnit()
   }
 
   task aggregateTestReports(type: TestReport) {
     destinationDir = test.reports.html.destination
+    dependsOn testNG
     reportOn test, testNG
   }
 
+  check.dependsOn testNG
   check.dependsOn aggregateTestReports
 }
 
