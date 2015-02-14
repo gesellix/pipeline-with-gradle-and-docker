@@ -21,7 +21,7 @@ ext {
 }
 
 task readVersionFile << {
-  def applicationVersionFile = new File('application-version.txt')
+  def applicationVersionFile = file("$rootDir/application-version.txt")
   if (!applicationVersionFile.exists()) {
     throw new RuntimeException("No application version file found")
   }
