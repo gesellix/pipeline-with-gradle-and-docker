@@ -1,5 +1,7 @@
 package org.hypoport.example.web
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -11,6 +13,8 @@ import org.springframework.web.client.RestTemplate
 
 @Configuration
 class HttpConfig {
+
+  Logger logger = LoggerFactory.getLogger(HttpConfig)
 
   @Bean
   public MappingJackson2HttpMessageConverter jackson2HttpMessageConverter() {
@@ -34,9 +38,11 @@ class HttpConfig {
 
   def httpsProxyAwareRequestFactory() {
     def factory = new SimpleClientHttpRequestFactory()
-    if (System.env['https_proxy']) {
-      def httpsProxy = new URI(System.env['https_proxy'] as String)
-      factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpsProxy.host, httpsProxy.port)))
+    def httpsProxy = System.env.https_proxy
+    if (httpsProxy && !"null".equals(httpsProxy)) {
+      logger.warn "configuring proxy at ${httpsProxy}..."
+      def httpsProxyUri = new URI(httpsProxy as String)
+      factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpsProxyUri.host as String, httpsProxyUri.port)))
     }
     return factory
   }
