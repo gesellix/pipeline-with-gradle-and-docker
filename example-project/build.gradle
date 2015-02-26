@@ -16,7 +16,7 @@ buildscript {
 def langLevel = '1.7'
 
 ext {
-  repo = Grgit.open(project.file('.'))
+  repo = Grgit.open(project.file('..'))
   artifactVersion = newArtifactVersion()
 }
 
@@ -36,7 +36,7 @@ subprojects {
       jcenter()
     }
     dependencies {
-      classpath 'com.github.ben-manes:gradle-versions-plugin:0.7'
+      classpath 'com.github.ben-manes:gradle-versions-plugin:0.8'
     }
   }
 
