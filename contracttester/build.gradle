@@ -1,0 +1,114 @@
+def contracttestsDirectory = "${buildDir}/contracttests"
+
+ext {
+  projectVersion = ""
+}
+
+group = 'org.hypoport.example'
+
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.8'
+  }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'com.github.ben-manes.versions'
+
+repositories {
+  mavenLocal()
+  flatDir {
+    dirs '../example-project/contracttests/build/libs'
+  }
+  mavenCentral()
+  jcenter()
+}
+
+configurations {
+  contracttests
+}
+
+def setupProjectVersionFromLocal() {
+  def projectVersionFile = new File('project-version.txt')
+  if (projectVersionFile.exists()) {
+    projectVersion = projectVersionFile.text.trim()
+    logger.warn "Using project version from file '${projectVersionFile.name}': $projectVersion"
+  }
+  else {
+    logger.error "could not read project version from file '${projectVersionFile.name}'"
+  }
+}
+
+def setupProjectVersionFromProd() {
+//  projectVersion = artifactVersionService.retrieveDeployedProjectProdCurrentVersion()
+  projectVersion = 'DUMMY'
+  logger.warn "Latest project-contracttests version: $projectVersion"
+}
+
+def addDependencies() {
+  def artifact = "org.hypoport.example:contracttests:${projectVersion}"
+  def consumertestDep = dependencies.create(artifact) {
+    transitive = false
+  }
+  dependencies.add 'testRuntime', dependencies.create(artifact)
+  dependencies.add 'contracttests', consumertestDep
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+  if (taskGraph.hasTask(contractTestTriggeredByProject)) {
+    setupProjectVersionFromLocal()
+    addDependencies()
+  }
+  else if (taskGraph.hasTask(contractTestTriggeredByOther)) {
+    setupProjectVersionFromProd()
+    addDependencies()
+  }
+}
+
+task unzipContracttests << {
+  copy {
+    from {
+      zipTree(configurations.contracttests.singleFile)
+    }
+    into {
+      contracttestsDirectory
+    }
+  }
+}
+
+task contracttests(type: Test) {
+  dependsOn unzipContracttests
+  testClassesDir file(contracttestsDirectory)
+
+  reports.html.destination = file("$reports.html.destination/contracttests")
+  reports.junitXml.destination = file("$reports.junitXml.destination/contracttests")
+}
+
+task aggregateTestReports(type: TestReport) {
+  destinationDir = test.reports.html.destination
+  reportOn contracttests
+}
+
+check.dependsOn aggregateTestReports
+
+task contractTestTriggeredByProject(dependsOn: contracttests) {
+  doLast {
+    logger.warn "running contract tests triggered by project..."
+  }
+}
+
+task contractTestTriggeredByOther(dependsOn: contracttests) {
+  doLast {
+    logger.warn "running contract tests triggered by other..."
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.2.1'
+  distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
