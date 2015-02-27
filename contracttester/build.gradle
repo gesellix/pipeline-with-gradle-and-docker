@@ -21,10 +21,8 @@ apply plugin: 'groovy'
 apply plugin: 'com.github.ben-manes.versions'
 
 repositories {
+  // relies on the necessary artifacts to be published in mavenLocal or externally available
   mavenLocal()
-  flatDir {
-    dirs '../example-project/contracttests/build/libs'
-  }
   mavenCentral()
   jcenter()
 }
@@ -46,28 +44,27 @@ def setupProjectVersionFromLocal() {
 
 def setupProjectVersionFromProd() {
 //  projectVersion = artifactVersionService.retrieveDeployedProjectProdCurrentVersion()
-  projectVersion = 'DUMMY'
+  projectVersion = 'unspecified'
   logger.warn "Latest project-contracttests version: $projectVersion"
 }
 
 def addDependencies() {
   def artifact = "org.hypoport.example:contracttests:${projectVersion}"
-  def consumertestDep = dependencies.create(artifact) {
+  def contracttestDep = dependencies.create(artifact) {
     transitive = false
   }
   dependencies.add 'testRuntime', dependencies.create(artifact)
-  dependencies.add 'contracttests', consumertestDep
+  dependencies.add 'contracttests', contracttestDep
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
   if (taskGraph.hasTask(contractTestTriggeredByProject)) {
     setupProjectVersionFromLocal()
-    addDependencies()
   }
   else if (taskGraph.hasTask(contractTestTriggeredByOther)) {
     setupProjectVersionFromProd()
-    addDependencies()
   }
+  addDependencies()
 }
 
 task unzipContracttests << {
