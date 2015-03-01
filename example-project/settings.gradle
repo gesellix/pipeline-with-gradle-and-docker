@@ -1,4 +1,4 @@
-rootProject.name = 'gradle-with-docker'
+rootProject.name = 'example-project'
 include 'backend',
         'common',
         'frontend',
