@@ -7,6 +7,16 @@ For details about the use cases demonstrated in this project, please read the bl
 this is a work in progress, with dedicated branches for each article. The master branch contains the sources for the
 most recent article.
 
+The [initial article](http://wp.me/p1E7sK-mv) ([part1.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/part1.md))
+gives a thorough overview over the complete pipeline, while each of the following build steps will be described in its own article:
+
+* [build, publish](http://wp.me/p1E7sK-nG) ([part2.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/part2.md))
+* [e2e test](http://wp.me/p1E7sK-oI) ([part3.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/part3.md))
+* contract test
+* build image
+* deploy on dev
+* deploy on prod
+
 
 Comments, Questions, Feedback
 =============================
