@@ -12,7 +12,7 @@ gives a thorough overview over the complete pipeline, while each of the followin
 
 * [build, publish](http://wp.me/p1E7sK-nG) ([part2.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part2.md))
 * [e2e test](http://wp.me/p1E7sK-oI) ([part3.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part3.md))
-* contract test
+* [contract test](...) ([part4.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part4.md))
 * build image
 * deploy on dev
 * deploy on prod

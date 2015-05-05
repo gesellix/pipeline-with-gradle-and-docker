@@ -25,6 +25,10 @@ While it should be easy for every consumer to perform their own contract tests,
 they should also provide a test package for the provider's pipeline or environment.
 That way the provider can preview its own changes and their effect on every consumer.
 
+![Overview Consumer/Producer/Contract Tests](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_overview.png)
+
+The figure above shows an overview for a combination of consumer, producer and contract tests. Contract tests are shown as tests from the consumer's perspective.
+
 # Contract Tests in Real Life
 
 As easy as it sounds, performing contract tests in continuous deployment pipelines isn't trivial.
@@ -52,7 +56,7 @@ Sometimes neither test stages nor ad hoc services are possible. Then one can cha
 
 The questions above show that runtime dependencies on a database can make things complicated. Similarly to the options we have with services, databases can also be provided via staging, but can also be started as needed. Starting a database spontaneously often implies that they can be thrown away quite easily, so one doesn't need to care about cleanups.
 
-# Contract Test Runners in CI
+# Contract Tests in a CI Environment
 
 In our team we have several combinations of our services being consumer of other services at our company and also being a producer for other services. Our contract test setup isn't limited to our own pipeline, but the other involved services need to perform the contract tests in their pipelines, too.
 
@@ -60,11 +64,40 @@ Contract tests can be triggered either when the producer or when the consumer ch
 
 1. When our service as consumer changes, we need to perform our contract tests against all providers whose API we consume. We need to perform the tests against the productive version of the producers, because we'd like to ensure that our newly built consumer will be working on our production system together with the producers' services.
 
+![Overview Contract Tests with a changed Consumer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_consumer.png)
+
 2. When a producer changes, it should trigger our contract tests to run against their newly built service. It should choose those tests which match our service in the production environment.
 
-`C -> P'`: `CT(C) -> P'`
+![Overview Contract Tests with a changed Producer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_producer.png)
 
-`C' -> P`: `CT(C') -> P`
+Both combinations are shown in very similar figures, where only service versions are changed (in blue), but the overall concept stays the same.
 
+# Contract Test Orchestration
 
+We didn't explain how a producer can find and execute the consumer's contract tests. We also didn't explain how a consumer can ask for a testable producer in cases where the production service shouldn't be used. In our case, we try to run a producer on demand, but sometimes we needed to use staged services of other teams.
 
+To solve those orchestrating aspects, we introduced specific contract tester projects. Over time, we added a specific contract tester for every combination of consumer and producer in our responsibility. Both sides of a contract test need to collaborate so that neither of them is enforced to know too many details on how to run a service or perform the contract tests. In our case we started with both consumer and producer being developed in our team, so that we didn't differentiate between both sides very much.
+
+### legacy implementation
+
+Our first incarnation of a contract tester had cross cutting knowledge about consumer and producer, so that we combined all necessary tasks in one Gradle script. To ease the use of the contract tester, we added two tasks which are considered as entrypoints for the producer's and the consumer's pipelines, respectively. Only one of both tasks should be run at a time, with the entrypoints named like:
+* performContracttestsTriggeredBy*Consumer*
+* performContracttestsTriggeredBy*Producer*
+
+Dependent on which of both tasks is run, the contract tester uses the productive or the newly built version of consumer and producer. So, running the `performContracttestsTriggeredByConsumer` task results in the following steps:
+1. resolve the productive version of a producer
+2. download or pull the productive producer
+3. download the consumer's contract tests of the newly built version
+4. run the producer
+5. perform the contract tests
+6. tear down the producer and cleanup
+
+Running the `performContracttestsTriggeredByProducer` only changes the first three steps:
+1. resolve the productive version of a consumer
+2. download or pull the newly built producer
+3. download the consumer's contract tests of the productive version
+4. ...
+
+You'll recognize that only the consumer's and the producer's version are input values. We use the TeamCity *Artifact Dependencies* feature to pass versions of newly built artifacts to the contract test build. The productive versions need to be resolved in a way the service allows us to. Sometimes we can perform a simple HTTP GET on a dedicated URL, sometimes a "resolve" only means to select a stage (dev or prod) where a service is always running.
+
+### current implementation
