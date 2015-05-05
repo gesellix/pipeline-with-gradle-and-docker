@@ -116,5 +116,7 @@ The details in the blue box show how we setup our service. Since we use a Docker
 
 After running the CouchDB and our service, we collect the actual service URL and save them on the TeamCity agent in a well known properties file (see `url.properties` in the green box of the image). The properties file will then be used in the *run* step as input parameter to the contract tests so that they can reach the producer service without hard coding any URL.
 
+Running the tests in this case is simplified by executing a TestNG runner with the contract tests and their dependencies on the classpath.
+
 The cleanup task is very easy with a Docker based setup: we only need to stop and remove the Docker containers. That way we don't even need to think about any database changes, because the database container is thrown away after every successful test run, too.
 
