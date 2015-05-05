@@ -63,11 +63,8 @@ In our team we have several combinations of our services being consumer of other
 Contract tests can be triggered either when the producer or when the consumer changes. In case any tests fail, the newly built service shouldn't be deployed to production. Since APIs evolve over time, the contract tests also change over time, so that they always match a combination of the consumer and producer version. The combination needs to be considered in the pipelines of the consumer and the producer as well:
 
 1. When our service as consumer changes, we need to perform our contract tests against all providers whose API we consume. We need to perform the tests against the productive version of the producers, because we'd like to ensure that our newly built consumer will be working on our production system together with the producers' services.
-
 ![Overview Contract Tests with a changed Consumer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_consumer.png)
-
 2. When a producer changes, it should trigger our contract tests to run against their newly built service. It should choose those tests which match our service in the production environment.
-
 ![Overview Contract Tests with a changed Producer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_producer.png)
 
 Both combinations are shown in very similar figures, where only service versions are changed (in blue), but the overall concept stays the same.
@@ -85,6 +82,7 @@ Our first incarnation of a contract tester had cross cutting knowledge about con
 * performContracttestsTriggeredBy*Producer*
 
 Dependent on which of both tasks is run, the contract tester uses the productive or the newly built version of consumer and producer. So, running the `performContracttestsTriggeredByConsumer` task results in the following steps:
+
 1. resolve the productive version of a producer
 2. download or pull the productive producer
 3. download the consumer's contract tests of the newly built version
@@ -93,6 +91,7 @@ Dependent on which of both tasks is run, the contract tester uses the productive
 6. tear down the producer and cleanup
 
 Running the `performContracttestsTriggeredByProducer` only changes the first three steps:
+
 1. resolve the productive version of a consumer
 2. download or pull the newly built producer
 3. download the consumer's contract tests of the productive version
