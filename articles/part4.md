@@ -102,16 +102,20 @@ You'll recognize that only the consumer's and the producer's version are input v
 
 ### current implementation
 
-While the first implementation is still being used and already has been copied for other combinations of producer and consumer, we recently had to provide one of our services as producer to a consuming service of another team. The other team already had their own contract testing concept with their own "Consumer Driven Test Suite". Our contract tester didn't need to know how to fetch and perform the contract tests anymore, it only needed to prepare a testable producer service.
+While the first implementation is still being used and has already been copied for other combinations of producer and consumer, we recently had to provide one of our services as producer to a consuming service of another team. The other team already had their own contract testing concept with their own "Consumer Driven Test Suite". Our contract tester didn't need to know how to fetch and perform the contract tests anymore, it only needed to prepare a testable producer service.
 
-We could now consider the consumer as an external service and agree on a clear definition of responsibilities. The common point was the CI-Server TeamCity with our individual pipelines, where both teams needed to add a contract test build goal.
+We could now consider the consumer as an external service and agree on a clear definition of responsibilities. The common point was the CI-Server TeamCity with our individual pipelines, where both teams needed to add a contract test build goal. Build goals in TeamCity can perform several steps, in our case similarly to a unit test:
+* setup/prepare
+* run/perform
+* tear down/cleanup
 
-Build goals in TeamCity can perform several steps, in our case similar to a workflow similar to unit tests:
-* setup
-* run
-* tear down
+The image below shows an overview of our build steps. In the blue box (*setup*) and as cleanup (*tear down*) you'll see the tasks which are implemented for the producing service. The red box (*run*) shows the task which actually performs the contract tests of the consuming service.
 
+![contract test tasks](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/contract-tests-uebersicht-nach-zubevoli.jpg)
 
+The details in the blue box show how we setup our service. Since we use a Docker based setup, our database CouchDB and our service are available as Docker images and can be pulled from a private registry. Both CouchDB and service images have tags, which allow us to fetch the desired version to be run. Both images are used on our production server so that we can be quite sure that the service behaves like in production. The difference to the production environment are mocks for external services, which shouldn't be relevant for contract tests.
 
+After running the CouchDB and our service, we collect the actual service URL and save them on the TeamCity agent in a well known properties file (see `url.properties` in the green box of the image). The properties file will then be used in the *run* step as input parameter to the contract tests so that they can reach the producer service without hard coding any URL.
 
+The cleanup task is very easy with a Docker based setup: we only need to stop and remove the Docker containers. That way we don't even need to think about any database changes, because the database container is thrown away after every successful test run, too.
 
