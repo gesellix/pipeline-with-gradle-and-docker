@@ -61,10 +61,10 @@ def addDependencies() {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-  if (taskGraph.hasTask(contractTestTriggeredByProject)) {
+  if (taskGraph.hasTask(performContracttestsTriggeredByConsumer)) {
     setupProjectVersionFromLocal()
   }
-  else if (taskGraph.hasTask(contractTestTriggeredByOther)) {
+  else if (taskGraph.hasTask(performContracttestsTriggeredByProducer)) {
     setupProjectVersionFromProd()
   }
   addDependencies()
@@ -96,15 +96,15 @@ task aggregateTestReports(type: TestReport) {
 
 check.dependsOn aggregateTestReports
 
-task contractTestTriggeredByProject(dependsOn: contracttests) {
+task performContracttestsTriggeredByConsumer(dependsOn: contracttests) {
   doLast {
-    logger.warn "running contract tests triggered by project..."
+    logger.warn "contract tests triggered by consumer finished."
   }
 }
 
-task contractTestTriggeredByOther(dependsOn: contracttests) {
+task performContracttestsTriggeredByProducer(dependsOn: contracttests) {
   doLast {
-    logger.warn "running contract tests triggered by other..."
+    logger.warn "contract tests triggered by producer finished"
   }
 }
 

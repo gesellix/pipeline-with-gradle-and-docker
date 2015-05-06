@@ -81,6 +81,8 @@ Running the `performContracttestsTriggeredByProducer` only changes the first thr
 
 You'll recognize that only the consumer's and the producer's version are input values. We use the TeamCity *Artifact Dependencies* feature to pass versions of newly built artifacts to the contract test build. The productive versions need to be resolved in a way the service allows us to. Sometimes we can perform a simple HTTP GET on a dedicated URL, sometimes a "resolve" only means to select a stage (dev or prod) where a service is always running.
 
+A stripped down implementation of our initial contract tester implementation if [available at GitHub](https://github.com/gesellix/pipeline-with-gradle-and-docker/tree/part4/contracttester-old). The example [contract tests](https://github.com/gesellix/pipeline-with-gradle-and-docker/tree/part4/example-project/contracttests) validate that the GitHub status API can be consumed. Though we won't discuss the actual code here, feel free to give it a try and if you have problems running it with the example-project, please ask.
+
 ## Current Contract Tester Implementation
 
 While the first implementation is still being used and has already been copied for other combinations of producer and consumer, we recently had to provide one of our services as producer to a consuming service of another team. The other team already had their own contract testing concept with their own "Consumer Driven Test Suite". Our contract tester didn't need to know how to fetch and perform the contract tests anymore, it only needed to prepare a testable producer service.
