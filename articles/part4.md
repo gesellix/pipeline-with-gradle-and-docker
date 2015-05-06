@@ -123,8 +123,22 @@ In the contract tester we again provided special tasks as entrypoints to the con
 
 ![Gradle Task Rules example](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/gradle-task-rules.png)
 
-Gradle task rules behave similar to normal tasks, so that they can be called like e.g. `./gradlew prepareContracttestsTriggeredByProducer`.
+Gradle task rules behave similar to normal tasks, so that they can be called like e.g. `./gradlew prepareContracttestsTriggeredByProducer`. Adding such rules is quite simple, you only need to define a closure to handle newly added task names. [Our handler](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build.gradle#L45) dynamically adds dependent on the called task name a new task and configures it to wait for the running producer and finishes with saving the mentioned `url.properties` file.
 
 ## Splitting .gradle Scripts
 
+Similar to the build sources directory we tried to clean up our `build.gradle` by extracting some tasks to other `.gradle` files. Combined with the task rules, this also enabled us to dynamically apply only necessary files.
 
+The [`build-setup-producer.gradle`](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-setup-producer.gradle) contains everything we need to run a producer service and is quite self contained, so that we might reuse the same file for other scenarios.
+
+Dependent on which pipeline triggered our contract tester, we [apply another](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build.gradle#L39) `build-triggered-by-....gradle` script. It only determines the service version using the version resolver class and [configures the `runProducerContainer`](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-triggered-by-consumer.gradle#L6) task to use the desired version.
+
+Applying other `.gradle` files sadly does't behave like a simple include, so that we need to keep some little tweaks in mind. One example is the usage of plugins and how to apply them: you cannot use their plugin id, but have to [apply their main class](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-setup-producer.gradle#L19). Nevertheless, splitting the main `build.gradle` script makes sense, when it comes to readability and reuse.
+
+# Summary and Outlook
+
+If you read up to this point you're probably curious about the next articles. As you already know, the next step in our deployment pipeline would be the Docker image build and afterwards the actual deployment on our servers.
+
+Things have changed since last year, in particular the Docker image build step has been integrated in the very first step: we not only publish our Spring Boot artifact, but also build and push our Docker image quite early. You can already see the necessary code in the [example-backend Gradle script](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/example-project/backend/build.gradle#L83), but we'll go into detail in the next article.
+
+We're glad about feedback, questions, and suggestions! So feel free to add a comment, [add a pull request](https://github.com/gesellix/pipeline-with-gradle-and-docker/pulls) with improvements, or contact us via Twitter [@gesellix](https://twitter.com/gesellix)!
