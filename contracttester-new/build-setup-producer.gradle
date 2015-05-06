@@ -1,0 +1,75 @@
+import de.gesellix.gradle.docker.DockerPlugin
+import de.gesellix.gradle.docker.tasks.DockerDisposeContainerTask
+import de.gesellix.gradle.docker.tasks.DockerInspectContainerTask
+import de.gesellix.gradle.docker.tasks.DockerRunTask
+import de.hypoport.example.HealthCheckService
+
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  dependencies {
+    classpath "de.gesellix:gradle-docker-plugin:2015-05-06T06-17-42"
+  }
+}
+
+apply plugin: DockerPlugin
+
+docker {
+  dockerHost = System.env.DOCKER_HOST ?: "tcp://127.0.0.1:2375"
+}
+
+ext {
+  producerPort = '8200'
+  producerHost = new URL((System.env.DOCKER_HOST ?: "tcp://127.0.0.1:2375" as String).replaceAll("^tcp:", "http:")).host
+  producerBaseUrl = "http://${producerHost}:${producerPort}/producer"
+  producerContainerRunConfig = {
+    imageName = "docker-registry.hypoport.local:5000/example/producer"
+    containerName = 'example-producer'
+    env = ['spring.profiles.active=mock-mode']
+    ports = ["${producerPort}:8080"]
+  }
+
+  couchdbContainerRunConfig = {
+    imageName = "docker-registry.hypoport.local:5000/klaemo/couchdb"
+    tag = "1.6.1"
+    containerName = 'example-producer-db'
+  }
+}
+
+task runProducerContainer(type: DockerRunTask)
+runProducerContainer producerContainerRunConfig
+runProducerContainer.doLast {
+  HealthCheckService.awaitServiceHealth("${producerBaseUrl}/health")
+}
+
+task runCouchdbContainer(type: DockerRunTask)
+runCouchdbContainer couchdbContainerRunConfig
+runProducerContainer.dependsOn runCouchdbContainer
+
+task inspectCouchdbContainer(type: DockerInspectContainerTask) {
+  containerId = runCouchdbContainer.containerName
+  doLast {
+    def couchdbIpAddress = containerInfo.content.NetworkSettings.IPAddress
+    runProducerContainer.env += "producerCouchDb.host=${couchdbIpAddress}"
+  }
+}
+runProducerContainer.dependsOn inspectCouchdbContainer
+inspectCouchdbContainer.shouldRunAfter runCouchdbContainer
+
+task disposeProducerContainer(type: DockerDisposeContainerTask) {
+  containerId = runProducerContainer.containerName
+  rmiParentImage = true
+}
+
+task disposeCouchdbContainer(type: DockerDisposeContainerTask) {
+  containerId = runCouchdbContainer.containerName
+}
+
+task cleanup {
+  dependsOn disposeProducerContainer
+  dependsOn disposeCouchdbContainer
+}

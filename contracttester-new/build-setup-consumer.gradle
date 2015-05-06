@@ -1,0 +1,42 @@
+ext {
+  contracttestsDirectory = "${buildDir}/contracttests"
+  addContractTestDependencies = { version ->
+    def artifactCoordinates = [
+        group  : 'org.hypoport.example',
+        name   : 'consumer-contract-tests',
+        version: version
+    ]
+    dependencies.add 'testRuntime', artifactCoordinates
+    dependencies.add 'contracttests', artifactCoordinates, { transitive = false }
+  }
+}
+
+configurations {
+  contracttests
+}
+
+task unzipContracttests << {
+  copy {
+    from { zipTree(configurations.contracttests.singleFile) }
+    include 'de/hypoport/example/consumer/**'
+    into { contracttestsDirectory }
+  }
+}
+
+task performContracttests(type: Test) {
+  dependsOn unzipContracttests
+
+  systemProperties["producerUrl"] = "${producerBaseUrl}/example"
+
+//  useTestNG()
+  testClassesDir file(contracttestsDirectory)
+
+  reports.html.destination = file("$reports.html.destination/contracttests")
+  reports.junitXml.destination = file("$reports.junitXml.destination/contracttests")
+}
+
+task aggregateTestReports(type: TestReport) {
+  destinationDir = test.reports.html.destination
+  reportOn performContracttests
+}
+check.dependsOn aggregateTestReports
