@@ -64,7 +64,6 @@ def createDownloadUrl(def artifactName, def artifactVersion, def type) {
   def releasesPath = "releases/download"
   def releaseTag = "example-apps-part3"
   "${host}/${projectPath}/${releasesPath}/${releaseTag}/${artifactName}.${type}"
-//  "${project["nexus.public.url"]}/${project["nexus.groupId"]}/$artifactName/$artifactVersion/$artifactName-${artifactVersion}.$type"
 }
 
 def defaultEnvironment() {
