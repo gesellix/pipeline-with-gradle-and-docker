@@ -56,7 +56,7 @@ We didn't explain how a producer can find and execute the consumer's contract te
 
 To solve those orchestrating aspects, we introduced specific contract tester projects. Over time, we added a specific contract tester for every combination of consumer and producer in our responsibility. Both sides of a contract test need to collaborate so that neither of them is enforced to know too many details on how to run a service or perform the contract tests. In our case we started with both consumer and producer being developed in our team, so that we didn't differentiate between both sides very much.
 
-### initial implementation
+## Initial Contract Tester Implementation
 
 Our first incarnation of a contract tester had cross cutting knowledge about consumer and producer, so that we combined all necessary tasks in one Gradle script. To ease the use of the contract tester, we added two tasks which are considered as entrypoints for the producer's and the consumer's pipelines, respectively. Only one of both tasks should be run at a time, with the entrypoints named like:
 
@@ -81,7 +81,7 @@ Running the `performContracttestsTriggeredByProducer` only changes the first thr
 
 You'll recognize that only the consumer's and the producer's version are input values. We use the TeamCity *Artifact Dependencies* feature to pass versions of newly built artifacts to the contract test build. The productive versions need to be resolved in a way the service allows us to. Sometimes we can perform a simple HTTP GET on a dedicated URL, sometimes a "resolve" only means to select a stage (dev or prod) where a service is always running.
 
-### current implementation
+## Current Contract Tester Implementation
 
 While the first implementation is still being used and has already been copied for other combinations of producer and consumer, we recently had to provide one of our services as producer to a consuming service of another team. The other team already had their own contract testing concept with their own "Consumer Driven Test Suite". Our contract tester didn't need to know how to fetch and perform the contract tests anymore, it only needed to prepare a testable producer service.
 

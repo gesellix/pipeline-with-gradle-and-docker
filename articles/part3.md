@@ -50,7 +50,7 @@ When the `e2eTests` task is finished we need to stop the background services. To
 
 A test run started with `./gradlew e2eTests` in the project root looks like the screenshot below. You get some information how many tests have passed; in case of a failure you get some more details and even stacktraces.
 
-<a href="https://hypoport.files.wordpress.com/2015/01/e2etests-console.png"><img src="https://hypoport.files.wordpress.com/2015/01/e2etests-console.png?w=300" alt="e2e tests output" width="300" height="151" class="aligncenter size-medium wp-image-1549" /></a>
+![e2e tests output](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part3/articles/e2etests-console.png)
 
 Though e2e tests are easy to write, and the Protractor features help on locating elements and minimizing timing issues, they can slow down your deployment pipeline a lot. In our case, the initial `build/publish` step needs less than two minutes, other steps in our pipeline also need more or less two minutes, but the e2e tests step needs at least seven minutes to execute 54 tests.
 

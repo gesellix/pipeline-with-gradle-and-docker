@@ -1,7 +1,7 @@
 After a quite long holiday break we now continue our series about the [Continuous Deployment Pipeline with Gradle and Docker](http://wp.me/p1E7sK-mv).
 
 This post is about the first step where our build chain creates the Spring Boot packages and publishes them to our Nexus repository manager. As shown in the high-level overview below, it is only a quite small part of the complete pipeline:
-<a href="https://hypoport.files.wordpress.com/2014/10/deployment-pipeline.png"><img class="aligncenter wp-image-1475 size-large" src="https://hypoport.files.wordpress.com/2014/10/deployment-pipeline.png?w=584" alt="Deployment Pipeline with Gradle and Docker" width="584" height="353" /></a>
+![Deployment Pipeline with Gradle and Docker](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part2/articles/deployment-pipeline.png)
 
 Gradle and Spring Boot provide you a very convenient build and plugin system and work out of the box for standard builds. Yet, the devil is in the details. Our project consists of a multi module setup with the following subprojects:
 
@@ -54,6 +54,6 @@ Our CI Server [TeamCity](https://www.jetbrains.com/teamcity/) now only needs to 
 
 TeamCity provides a feature to declare so-called `build artifacts`, which can be used by subsequent build goals in our build chain. We want the other build goals to know the application version, so we write it into a text file on the build agent and pass it to all build goals in our pipeline. Every build goal then uses the version to fetch the artifact from Nexus. The image below shows all build goals of our build chain:
 
-<a href="https://hypoport.files.wordpress.com/2014/10/build-chain-prod.png"><img class="aligncenter size-medium wp-image-1498" src="https://hypoport.files.wordpress.com/2014/10/build-chain-prod.png?w=300" alt="Build Chain" width="300" height="61" /></a>
+![Build Chain](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part2/articles/build-chain-prod.png)
 
 The selected yellow box in the build chain corresponds to the build step we described in this article. As promised, the next article in our series will describe you in detail how we perform our integrative e2e- and contract-tests. Comments and feedback here or [@gesellix](https://twitter.com/gesellix) are welcome!
