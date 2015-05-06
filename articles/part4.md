@@ -1,29 +1,18 @@
-In part four of our series about our continuous deployment pipeline you'll learn about how we perform
-contract tests to ensure our service stays compatible with other service producers and our consumers as well.
+In part four of our series about our continuous deployment pipeline you'll learn about how we perform contract tests to ensure our service stays compatible with other service producers and our consumers as well.
 
-Please read the [introductury post](http://blog-it.hypoport.de/2014/07/25/a-continuous-deployment-pipeline-with-gradle-and-docker/)
-to learn about the other articles and the overall context of our deployment pipeline.
+Please read the [introductury post](http://blog-it.hypoport.de/2014/07/25/a-continuous-deployment-pipeline-with-gradle-and-docker/) to learn about the other articles and the overall context of our deployment pipeline.
 
 # What are Contract Tests?
 
-The comprehensive overview on [Testing Strategies in a Microservice Architecture](http://martinfowler.com/articles/microservice-testing/)
-introduces [contract testing](http://martinfowler.com/articles/microservice-testing/#testing-contract-introduction) as complementary method
-to increase test coverage:
+The comprehensive overview on [Testing Strategies in a Microservice Architecture](http://martinfowler.com/articles/microservice-testing/) introduces [contract testing](http://martinfowler.com/articles/microservice-testing/#testing-contract-introduction) as complementary method to increase test coverage:
 
 Apart from unit, integration, component, and end-to-end tests, the contract tests aim at checking service boundaries.
 
-Every consumer defines a set of criteria or requirements which need to be fulfilled by a service provider.
-The sum of all requirements defines the overall service contract. With contract testing,
-consumers can check the provider's contract or their own requirements before a new release is deployed in production.
+Every consumer defines a set of criteria or requirements which need to be fulfilled by a service producer. The sum of all requirements defines the overall service contract. With contract testing, consumers can check the producer's contract or their own requirements before a new release is deployed in production.
 
-The contract tests shouldn't check the provider's behaviour, but only verify that the API can be consumed.
-Checking behaviour would result in component tests, which should be performed on the provider's
-side and are not the responsibility of its consumers.
+The contract tests shouldn't check the producer's behaviour, but only verify that the API can be consumed. Checking behaviour would result in component tests, which should be performed on the producer's side and are not the responsibility of its consumers.
 
-Contract tests should be performed either when the consumer changes or when the producer changes.
-While it should be easy for every consumer to perform their own contract tests,
-they should also provide a test package for the provider's pipeline or environment.
-That way the provider can preview its own changes and their effect on every consumer.
+Contract tests should be performed either when the consumer changes or when the producer changes. While it should be easy for every consumer to perform their own contract tests, they should also provide a test package for the producer's pipeline or environment. That way the producer can preview its own changes and their effect on every consumer.
 
 ![Overview Consumer/Producer/Contract Tests](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_overview.png)
 
@@ -33,26 +22,18 @@ The figure above shows an overview for a combination of consumer, producer and c
 
 As easy as it sounds, performing contract tests in continuous deployment pipelines isn't trivial.
 
-In our case services are written in Java, so we write our contract tests as Java unit tests,
-using test runners like JUnit or TestNG and execute them with shell or Gradle scripts.
-Packaging such test classes as *jar* files and publishing them in an artifact repository
-belongs to the simple aspects. But making a provider available for contract tests
-can become very exciting and produces several questions, e.g.:
+In our case services are written in Java, so we write our contract tests as Java unit tests, using test runners like JUnit or TestNG and execute them with shell or Gradle scripts. Packaging such test classes as *jar* files and publishing them in an artifact repository belongs to the simple aspects. But making a producer available for contract tests can become very exciting and produces several questions, e.g.:
 
 * can the tests be performed against the production service?
 * what happens when tests need some setup (e.g. a user account) or need to have a valid session to consume the service API?
 * do the tests have an effect on the overall service availablility?
 * what about database entries being generated by the tests - do we need a cleanup?
 
-With both consumer and provider in one team communication becomes easier when concepts
-or requirements are introduced or changed. When consumer and provider are split between
-different teams or even companies, it becomes more important to define a clear API.
-[Consumer-Driven Contracts](http://martinfowler.com/articles/consumerDrivenContracts.html#Consumer-drivenContracts) help the provider
-to align their implementation at the consumer's needs.
+With both consumer and producer in one team communication becomes easier when concepts or requirements are introduced or changed. When consumer and producer are split between different teams or even companies, it becomes more important to define a clear API. [Consumer-Driven Contracts](http://martinfowler.com/articles/consumerDrivenContracts.html#Consumer-drivenContracts) help the producer to align their implementation at the consumer's needs.
 
-To address the questions above, the provider might avoid to let all consumers perform tests against the production service - unless they want to stress test theim. Often, the provider has a staging concept, with a *mirror to production* system being available for different kind of tests. Such systems should behave as much as possible like the production system. An alternative to a dedicated test stage are services being started spontaneously, and only for the actual test run. Such systems should boot very fast to support a fast feedback cycle and increase the developers' acceptance.
+To address the questions above, the producer might avoid to let all consumers perform tests against the production service - unless they want to stress test theim. Often, the producer has a staging concept, with a *mirror to production* system being available for different kind of tests. Such systems should behave as much as possible like the production system. An alternative to a dedicated test stage are services being started spontaneously, and only for the actual test run. Such systems should boot very fast to support a fast feedback cycle and increase the developers' acceptance.
 
-Sometimes neither test stages nor ad hoc services are possible. Then one can change the production behaviour dependent on the logged in user role or based on request parameters. Nevertheless, the provider should still try to support the consumer writing tests independent on provider specific issues: request parameters to only toggle a *under test behaviour* on the provider side would become a part of the contract test - and ultimately a part of the contract. Changing the provider's test setup would then break the contract tests, though the API as test subject could stay the same.
+Sometimes neither test stages nor ad hoc services are possible. Then one can change the production behaviour dependent on the logged in user role or based on request parameters. Nevertheless, the producer should still try to support the consumer writing tests independent on producer specific issues: request parameters to only toggle a *under test behaviour* on the producer side would become a part of the contract test - and ultimately a part of the contract. Changing the producer's test setup would then break the contract tests, though the API as test subject could stay the same.
 
 The questions above show that runtime dependencies on a database can make things complicated. Similarly to the options we have with services, databases can also be provided via staging, but can also be started as needed. Starting a database spontaneously often implies that they can be thrown away quite easily, so one doesn't need to care about cleanups.
 
@@ -62,7 +43,7 @@ In our team we have several combinations of our services being consumer of other
 
 Contract tests can be triggered either when the producer or when the consumer changes. In case any tests fail, the newly built service shouldn't be deployed to production. Since APIs evolve over time, the contract tests also change over time, so that they always match a combination of the consumer and producer version. The combination needs to be considered in the pipelines of the consumer and the producer as well:
 
-1. When our service as consumer changes, we need to perform our contract tests against all providers whose API we consume. We need to perform the tests against the productive version of the producers, because we'd like to ensure that our newly built consumer will be working on our production system together with the producers' services.
+1. When our service as consumer changes, we need to perform our contract tests against all producers whose API we consume. We need to perform the tests against the productive version of the producers, because we'd like to ensure that our newly built consumer will be working on our production system together with the producers' services.
 ![Overview Contract Tests with a changed Consumer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_consumer.png)
 2. When a producer changes, it should trigger our contract tests to run against their newly built service. It should choose those tests which match our service in the production environment.
 ![Overview Contract Tests with a changed Producer](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/ContractTests_new_producer.png)
@@ -78,6 +59,7 @@ To solve those orchestrating aspects, we introduced specific contract tester pro
 ### initial implementation
 
 Our first incarnation of a contract tester had cross cutting knowledge about consumer and producer, so that we combined all necessary tasks in one Gradle script. To ease the use of the contract tester, we added two tasks which are considered as entrypoints for the producer's and the consumer's pipelines, respectively. Only one of both tasks should be run at a time, with the entrypoints named like:
+
 * performContracttestsTriggeredBy*Consumer*
 * performContracttestsTriggeredBy*Producer*
 
@@ -104,6 +86,7 @@ You'll recognize that only the consumer's and the producer's version are input v
 While the first implementation is still being used and has already been copied for other combinations of producer and consumer, we recently had to provide one of our services as producer to a consuming service of another team. The other team already had their own contract testing concept with their own "Consumer Driven Test Suite". Our contract tester didn't need to know how to fetch and perform the contract tests anymore, it only needed to prepare a testable producer service.
 
 We could now consider the consumer as an external service and agree on a clear definition of responsibilities. The common point was the CI-Server TeamCity with our individual pipelines, where both teams needed to add a contract test build goal. Build goals in TeamCity can perform several steps, in our case similarly to a unit test:
+
 * setup/prepare
 * run/perform
 * tear down/cleanup
