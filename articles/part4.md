@@ -58,7 +58,7 @@ To solve those orchestrating aspects, we introduced specific contract tester pro
 
 ## Initial Contract Tester Implementation
 
-Our first incarnation of a contract tester had cross cutting knowledge about consumer and producer, so that we combined all necessary tasks in one Gradle script. To ease the use of the contract tester, we added two tasks which are considered as entrypoints for the producer's and the consumer's pipelines, respectively. Only one of both tasks should be run at a time, with the entrypoints named like:
+Our first iteration of a contract tester had cross cutting knowledge about consumer and producer, so that we combined all necessary tasks in one Gradle script. To ease the use of the contract tester, we added two tasks which are considered as entrypoints for the producer's and the consumer's pipelines, respectively. Only one of both tasks should be run at a time, with the entrypoints named like:
 
 * performContracttestsTriggeredBy*Consumer*
 * performContracttestsTriggeredBy*Producer*
@@ -93,15 +93,38 @@ We could now consider the consumer as an external service and agree on a clear d
 * run/perform
 * tear down/cleanup
 
-The image below shows an overview of our build steps. In the blue box (*setup*) and as cleanup (*tear down*) you'll see the tasks which are implemented for the producing service. The red box (*run*) shows the task which actually performs the contract tests of the consuming service.
+The image below shows an overview of our build steps. In the blue box (*setup*) and as cleanup (*tear down*) you'll see the tasks which are implemented for the producing service. The red box (*run*) shows the task which actually performs the contract tests of the consuming service. Please see the "[contracttester-new](https://github.com/gesellix/pipeline-with-gradle-and-docker/tree/part4/contracttester-new)" subfolder for the actual code.
 
 ![contract test tasks](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/contract-tests-uebersicht-nach-zubevoli.jpg)
 
-The details in the blue box show how we setup our service. Since we use a Docker based setup, our database CouchDB and our service are available as Docker images and can be pulled from a private registry. Both CouchDB and service images have tags, which allow us to fetch the desired version to be run. Both images are used on our production server so that we can be quite sure that the service behaves like in production. The difference to the production environment are mocks for external services, which shouldn't be relevant for contract tests.
+The details in the blue box show how we setup our service. Since we use a Docker based setup, our database CouchDB and our service are available as Docker images and can be pulled from a private registry. Both CouchDB and service images have tags, which allow us to fetch the desired version to be run. Both images are used on our production server so that we can be quite sure that the service behaves like in production. The difference to the production environment are [mocks for external services](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-setup-producer.gradle#L32), which shouldn't be relevant for contract tests.
 
-After running the CouchDB and our service, we collect the actual service URL and save them on the TeamCity agent in a well known properties file (see `url.properties` in the green box of the image). The properties file will then be used in the *run* step as input parameter to the contract tests so that they can reach the producer service without hard coding any URL.
+After [running the CouchDB and our service](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-setup-producer.gradle#L51), we collect the actual service URL and save it on the TeamCity agent in a well known [properties file](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build.gradle#L62) (named `url.properties` in the green box of the image). The properties file will then be used in the TeamCity *run* step as input parameter to the contract tests so that they can reach the producer service without hard coding any URL.
 
-Running the tests in this case is simplified by executing a TestNG runner with the contract tests and their dependencies on the classpath.
+Running the tests in this case is simplified by executing a TestNG runner with the contract tests and their dependencies on the classpath, which happens externally to our contract tester.
 
-The cleanup task is very easy with a Docker based setup: we only need to stop and remove the Docker containers. That way we don't even need to think about any database changes, because the database container is thrown away after every successful test run, too.
+The [cleanup task](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/build-setup-producer.gradle#L72) is very easy with a Docker based setup: we only need to stop and remove the Docker containers. That way we don't even need to think about any database changes, because the database container is thrown away after every successful test run, too.
+
+# Gradle goodies
+
+In addition to the contract tester concept, we used some more advanced Gradle features. Gradle isn't only a wrapper around Groovy, but it also tries enable you to use a more build domain specific language in your script files. We'll only show you some codepointers to the improvements of our most recent contract tester compared to the first iteration.
+
+## Build Sources
+
+Gradle knows about a [special directory `buildSrc`](http://gradle.org/docs/current/userguide/organizing_build_logic.html#sec:build_sources), which will be compiled (and tested) before running the `build.gradle` script. Classes in the `buildSrc` module will be available in the build script classpath, which allows us to move implementation details to a plugin like submodule.
+
+In our example contract tester, you'll see that we moved a [ProducerVersionResolver](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/buildSrc/src/main/groovy/de/hypoport/example/ProducerVersionResolver.groovy) and a [HealthCheckService](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/part4/contracttester-new/buildSrc/src/main/groovy/de/hypoport/example/HealthCheckService.groovy) to the build source module. Both classes are used in the build script, the former one to find the correct service version, the latter one helps us waiting for the service startup before leaving control back to the caller (i.e. TeamCity).
+
+You can consider the build source module like a minimal plugin implementation without the hazzle of publishing one. The Gradle user guide about [organizing build logic](http://gradle.org/docs/current/userguide/organizing_build_logic.html) discusses the pros and cons of custom tasks, build source, and dedicated plugins and we would recommend you to read it when you're interested in keeping your `build.gradle` clear and readable.
+
+## Task Rules
+
+In the contract tester we again provided special tasks as entrypoints to the contract tester. This time we didn't explicitly define both tasks, but used [Gradle Task Rules](https://gradle.org/docs/current/userguide/more_about_tasks.html#N10F07) to gain more flexibility and generate the necessary entrypoint on demand. The `./gradlew tasks` command lists such rules in the *Rules* section:
+
+![Gradle Task Rules example](https://github.com/gesellix/pipeline-with-gradle-and-docker/raw/part4/articles/gradle-task-rules.png)
+
+Gradle task rules behave similar to normal tasks, so that they can be called like e.g. `./gradlew prepareContracttestsTriggeredByProducer`.
+
+## Splitting .gradle Scripts
+
 
