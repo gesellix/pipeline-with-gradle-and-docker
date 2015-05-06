@@ -22,16 +22,11 @@ dependencies {
   compile("org.springframework.security:spring-security-web:$springSecurityVersion")
 
   compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jacksonVersion"
-  compile 'ch.qos.logback:logback-access:1.1.2'
+  compile 'ch.qos.logback:logback-access:1.1.3'
 
   compile('org.ektorp:org.ektorp:1.4.2')
 
   compile("javax.mail:mail:1.4.7")
-
-  testCompile("org.spockframework:spock-core:0.7-groovy-2.0")
-  testCompile("org.easytesting:fest-assert:1.4")
-  testCompile("org.mockito:mockito-all:1.9.5")
-  testCompile("org.testng:testng:6.8.17")
 
   compile project(':common')
 }

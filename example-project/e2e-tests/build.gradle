@@ -2,7 +2,7 @@ import java.util.concurrent.CountDownLatch
 
 buildscript {
   dependencies {
-    classpath 'com.moowork.gradle:gradle-node-plugin:0.8'
+    classpath 'com.moowork.gradle:gradle-node-plugin:0.9'
     classpath 'de.undercouch:gradle-download-task:1.2'
   }
 }
