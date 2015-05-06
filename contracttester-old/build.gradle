@@ -20,12 +20,13 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'com.github.ben-manes.versions'
 
-// this module relies on the necessary artifacts to be published in mavenLocal or externally available
+// This module relies on the necessary artifacts to be published in mavenLocal or externally available,
+// i.e. you'll probably need to perform the following task in the "example-project":
+// `./gradlew build install publishToMavenLocal`
+// Some dependencies have been prepared in the GitHub repository.
 repositories {
   mavenLocal()
-  maven {
-    url "https://raw.githubusercontent.com/gesellix/pipeline-with-gradle-and-docker/mvnrepo/"
-  }
+  maven { url "https://raw.githubusercontent.com/gesellix/pipeline-with-gradle-and-docker/mvnrepo/" }
   mavenCentral()
   jcenter()
 }

@@ -5,10 +5,3 @@ runProducerContainer.doFirst {
   logger.lifecycle "producerVersion: ${producerVersion}"
   runProducerContainer.tag = producerVersion
 }
-
-// TODO Kann weg, wenn wir die Tests nicht mehr "manuell" ausführen
-unzipContracttests.doFirst {
-  def consumerContractTestsVersion = consumerVersionResolver.resolveProductionVersion()
-  logger.lifecycle "consumerContractTestsVersion: ${consumerContractTestsVersion}"
-  addContractTestDependencies(consumerContractTestsVersion)
-}

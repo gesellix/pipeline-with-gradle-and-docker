@@ -32,8 +32,8 @@ subprojects {
   buildscript {
     repositories {
       mavenLocal()
-      mavenCentral()
       jcenter()
+      mavenCentral()
     }
     dependencies {
       classpath 'com.github.ben-manes:gradle-versions-plugin:0.9'

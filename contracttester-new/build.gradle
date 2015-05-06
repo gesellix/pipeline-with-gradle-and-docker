@@ -1,4 +1,3 @@
-import de.hypoport.example.ConsumerVersionResolver
 import de.hypoport.example.ProducerVersionResolver
 
 buildscript {
@@ -15,28 +14,21 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'com.github.ben-manes.versions'
 
-
 // This module relies on the necessary artifacts to be published in mavenLocal or externally available,
 // i.e. you'll probably need to perform the following task in the "example-project":
 // `./gradlew build install publishToMavenLocal`
 // Some dependencies have been prepared in the GitHub repository.
 repositories {
   mavenLocal()
-  maven {
-    url "https://raw.githubusercontent.com/gesellix/pipeline-with-gradle-and-docker/mvnrepo/"
-  }
+  maven { url "https://raw.githubusercontent.com/gesellix/pipeline-with-gradle-and-docker/mvnrepo/" }
   mavenCentral()
   jcenter()
 }
 
 group = 'org.hypoport.example'
 
-
 ext {
-  projectVersion = ""
-
   producerVersionResolver = new ProducerVersionResolver(project)
-  consumerVersionResolver = new ConsumerVersionResolver(project)
 
   buildTriggers = ["consumer", "producer"]
   applyBuildConfiguration = { String triggeredBy ->
@@ -49,25 +41,6 @@ ext {
 }
 
 apply from: file('build-setup-producer.gradle')
-
-// TODO Kann weg, wenn wir die Tests nicht mehr "manuell" ausführen
-apply from: file('build-setup-consumer.gradle')
-tasks.withType(Test).each { task ->
-  task.dependsOn runProducerContainer
-  task.finalizedBy cleanup
-}
-
-// TODO Kann weg, wenn wir die Tests nicht mehr "manuell" ausführen
-tasks.addRule("Perform Contract-Tests: performContracttestsTriggeredBy<Consumer|Producer>") { String taskName ->
-  if (taskName.startsWith("performContracttestsTriggeredBy")) {
-    def triggeredBy = taskName.substring("performContracttestsTriggeredBy".length()).toLowerCase()
-    applyBuildConfiguration(triggeredBy)
-
-    task(taskName) {
-      dependsOn performContracttests
-    }
-  }
-}
 
 tasks.addRule("Prepare Contract-Tests: prepareContracttestsTriggeredBy<Consumer|Producer>") { String taskName ->
   if (taskName.startsWith("prepareContracttestsTriggeredBy")) {
@@ -87,7 +60,7 @@ tasks.addRule("Prepare Contract-Tests: prepareContracttestsTriggeredBy<Consumer|
         }
         logger.lifecycle "writing producerUrl to '${producerPropertiesFile}'"
         producerPropertiesFile.withPrintWriter { PrintWriter w ->
-          w.append("producerUrl=${producerBaseUrl}/example\n")
+          w.append("producerUrl=${producerBaseUrl}\n")
         }
         logger.lifecycle "contractTests can now be performed against '${producerBaseUrl}'"
       }

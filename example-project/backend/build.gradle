@@ -1,12 +1,17 @@
+import de.gesellix.gradle.docker.tasks.DockerBuildTask
+import de.gesellix.gradle.docker.tasks.DockerPushTask
+import de.gesellix.gradle.docker.tasks.DockerRmiTask
 import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
   dependencies {
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+    classpath "de.gesellix:gradle-docker-plugin:2015-05-06T06-17-42"
   }
 }
 
 apply plugin: 'spring-boot'
+apply plugin: 'de.gesellix.docker'
 apply plugin: 'com.github.ben-manes.versions'
 
 dependencies {
@@ -35,9 +40,50 @@ processResources {
   filter ReplaceTokens, tokens: ['example.version': artifactVersion]
 }
 
-// notwendig, wenn 'publish' ohne vorheriges 'build' aufgerufen wird
-tasks.publish.dependsOn bootRepackage
-
 test {
   systemProperties = System.properties
 }
+
+// notwendig, wenn 'publish' ohne vorheriges 'build' aufgerufen wird
+tasks.publish.dependsOn bootRepackage
+
+docker {
+  dockerHost = System.env.DOCKER_HOST ?: "tcp://127.0.0.1:2375"
+}
+
+ext {
+  dockerBuildContextSources = file("${projectDir}/src/main/docker")
+  dockerBuildContextDir = file("${buildDir}/docker")
+  dockerBackendServiceImageName = 'hypoport/example-backend'
+}
+
+task prepareBuildContext(type: Copy) {
+  from dockerBuildContextSources
+  into dockerBuildContextDir
+}
+
+task copyArtifact(type: Copy) {
+  dependsOn bootRepackage
+  dependsOn prepareBuildContext
+  from jar.archivePath
+  into dockerBuildContextDir
+  rename { 'backend.jar' }
+}
+
+task buildImage(type: DockerBuildTask) {
+  dependsOn copyArtifact
+  imageName = "${dockerBackendServiceImageName}:${artifactVersion}"
+  buildContextDirectory = dockerBuildContextDir
+}
+
+task rmiLocalImage(type: DockerRmiTask) {
+  imageId = "${dockerBackendServiceImageName}:${artifactVersion}"
+}
+
+task pushImage(type: DockerPushTask) {
+  dependsOn buildImage
+  repositoryName = "${dockerBackendServiceImageName}:${artifactVersion}"
+  authConfigPlain = getDockerClient().readDefaultAuthConfig()
+  finalizedBy rmiLocalImage
+}
+tasks.publish.finalizedBy pushImage

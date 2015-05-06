@@ -23,18 +23,18 @@ docker {
 }
 
 ext {
-  producerPort = '8200'
+  producerPort = '8090'
   producerHost = new URL((System.env.DOCKER_HOST ?: "tcp://127.0.0.1:2375" as String).replaceAll("^tcp:", "http:")).host
-  producerBaseUrl = "http://${producerHost}:${producerPort}/producer"
+  producerBaseUrl = "http://${producerHost}:${producerPort}/example-backend"
   producerContainerRunConfig = {
-    imageName = "docker-registry.hypoport.local:5000/example/producer"
+    imageName = "hypoport/example-backend"
     containerName = 'example-producer'
     env = ['spring.profiles.active=mock-mode']
     ports = ["${producerPort}:8080"]
   }
 
   couchdbContainerRunConfig = {
-    imageName = "docker-registry.hypoport.local:5000/klaemo/couchdb"
+    imageName = "klaemo/couchdb"
     tag = "1.6.1"
     containerName = 'example-producer-db'
   }
