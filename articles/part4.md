@@ -2,6 +2,8 @@ In part four of our series about our continuous deployment pipeline you'll learn
 
 Please read the [introductury post](http://blog-it.hypoport.de/2014/07/25/a-continuous-deployment-pipeline-with-gradle-and-docker/) to learn about the other articles and the overall context of our deployment pipeline.
 
+This article contains both an introduction to contract testing, and our individual implementation of contract testers. If you're new to the contract testing concept, just read on. If you're already familiar to the overall concept and want to start with our code, you can skip to the [Contract Test Orchestration](#contract-test-orchestration) section.
+
 # What are Contract Tests?
 
 The comprehensive overview on [Testing Strategies in a Microservice Architecture](http://martinfowler.com/articles/microservice-testing/) introduces [contract testing](http://martinfowler.com/articles/microservice-testing/#testing-contract-introduction) as complementary method to increase test coverage:
@@ -50,6 +52,7 @@ Contract tests can be triggered either when the producer or when the consumer ch
 
 Both combinations are shown in very similar figures, where only service versions are changed (in blue), but the overall concept stays the same.
 
+<a id="contract-test-orchestration" aria-hidden="true"></a>
 # Contract Test Orchestration
 
 We didn't explain how a producer can find and execute the consumer's contract tests. We also didn't explain how a consumer can ask for a testable producer in cases where the production service shouldn't be used. In our case, we try to run a producer on demand, but sometimes we needed to use staged services of other teams.
