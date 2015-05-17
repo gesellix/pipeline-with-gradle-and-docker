@@ -4,7 +4,7 @@ What's missing are the description of how we package our application in Docker i
 
 Though we originally had a dedicated *Docker build and push* step in our pipeline, things have changed since last year. The Docker image build has been integrated into the very first step, so that we not only have the Spring Boot artifacts in our repository, but the corresponding Docker image in our registry, as soon as possible.  The Docker build and push code isn't very large, so this article will also show you how we use the Docker images to deploy and run our application on our production hosts. The [example code](https://github.com/gesellix/pipeline-with-gradle-and-docker/tree/part5) will be available at GitHub.
 
-  # Docker for Application Packaging
+# Docker for Application Packaging
 
 You've certainly heard about Docker, so we won't go into any detailed Docker concepts here. If you're new to Docker and would like to learn some basics, please head over to the [10-minute tutorial](https://www.docker.com/tryit/) at the official [docker.com](https://www.docker.com/) web site.
 
