@@ -33,6 +33,12 @@ dependencies {
 
   compile("javax.mail:mail:1.4.7")
 
+  compile 'io.prometheus:client:0.0.8'
+//  compile 'io.prometheus.client.utility:jvmstat:0.0.8'
+  compile 'io.prometheus.client.utility:hotspot:0.0.8'
+  compile 'com.matttproud.accepts:accepts:0.0.2'
+  compile 'args4j:args4j:2.0.16'
+
   compile project(':common')
 }
 
