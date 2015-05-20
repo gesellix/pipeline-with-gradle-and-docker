@@ -24,14 +24,24 @@ Our Docker images are tagged with the same version like the application jar, whi
 
 Our tool of choice to orchestrate the deployments is Ansible. We use Ansible to provision and maintain our infrastructure, and it also allows us to perform ad hoc tasks like application deployments or cleanup tasks. Ansible uses tasks, roles, and playbooks to describe a desired system state.
 
-Relevant in the context of our application deployment are such details like blue-green deployment and load balancing of the same application version on different hosts. We use a HAProxy as load balancer and as switch between our blue and green versions in front of our applications. Our application isn't aware of those aspects, which increases scalablility and flexibility.
+Relevant in the context of our application deployment are such details like blue-green deployment and load balancing of the same application version on different hosts. We use a HAProxy as load balancer and as switch between our blue and green versions in front of our applications. Our application isn't aware of those aspects, which increases scalablility and flexibility. So, the Ansible playbook has to decide which version (blue or green) needs to be replaced by the newly build release. In summary, the Ansible playbook needs to perform the following tasks:
 
-Our Ansible playbook has to decide which version needs to be replaced by the newly build release and it also needs to know where it needs to be deployed. So it needs to determine whether to replace the blue or green stage and we need to pass the desired version to the playbook. In summary, the Ansible playbook needs to perform the following tasks:
-
-* pull the new Docker image to our hosts
 * determine which version to replace (blue or green)
+* pull the new Docker image to our hosts
 * stop and remove the old containers
 * run new container instances based on the new image
 * update the HAProxy config to route new requests to the new containers
 
-Additionally to these essential tasks, there are some bookkeeping and cleanup tasks necessary. The beauty of Ansible lies in the possibility to keep our internal, staging, and production inventory seperated, while the tasks are generally applicable on any host.
+Additionally to these essentials, there are some book keeping and cleanup tasks necessary.
+
+## Example Playbook and Tasks
+
+We won't share our complete Ansible repository here, so the examples won't work out of the box, but to help you get an idea how Ansible tasks can look like, please have a look at the `ansible` directory.
+
+In the *hosts* directory you'll only find a production sub directory with the inventory and production specific variables. Beside the production directory we have other stages or environments defined, too. The beauty of Ansible lies in the possibility to keep our internal, staging, and production inventory seperated, while the tasks are usually applicable on any host.
+
+The *library* directory contains scripts or Ansible modules which can be executed in the context of a task. Since Ansible tasks should be declarative and less imperative, we moved some commands to the library scripts.
+
+In *playbooks* you'll find the entrypoint when working with an Ansible project. Playbooks configure tasks, the affected hosts and other environment specific details. Most work is performed in the *tasks* directory, though.
+
+You'll see that the generic *docker-service* task configures an Ansible Docker module to communicate with a Docker daemon. Some tasks are obsolete since Ansible 1.9, where a `reloaded` state has been introduced. Apart from most variables being configured in the playbook or the *group_vars* and *host_vars*, the `example_version` variable is passed via command line in our TeamCity build step.
