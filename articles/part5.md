@@ -14,7 +14,7 @@ We're using Docker to package, distribute, and run our application. Similar to t
 
 With such a more explicitly defined environment we can also expect the application to behave in a consistent way on different hosts. Due to the simplicity of a reduced Docker image we also have a smaller scope to consider when changing or updating the environment.
 
-The Docker daemon on our build infrastructure is usually availble via its HTTP remote api, so that we can use any Docker client library instead of the Docker command line binary. Our Gradle scripts leverage the communication to the Docker daemon with the help of a Gradle Docker plugin. It adds several tasks to our build scripts which can be configured quite easily to create new Docker images, and push them to our private Docker registry. We also use other tasks to pull and run Docker images in our contract test build step, like already described in the last article.
+The Docker daemon on our build infrastructure is usually available via its HTTP remote api, so that we can use any Docker client library instead of the Docker command line binary. Our Gradle scripts leverage the communication to the Docker daemon with the help of a Gradle Docker plugin. It adds several tasks to our build scripts which can be configured quite easily to create new Docker images, and push them to our private Docker registry. We also use other tasks to pull and run Docker images in our contract test build step, like already described in the last article.
 
 The Docker build task depends on some preparation tasks which copy the necessary application jar and the Dockerfile to a temporary directory. That directory is considered as build context, which is sent to the Docker daemon as source for the final image.
 
