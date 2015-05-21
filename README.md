@@ -13,9 +13,9 @@ gives a thorough overview over the complete pipeline, while each of the followin
 * [build, publish](http://wp.me/p1E7sK-nG) ([part2.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part2.md))
 * [e2e test](http://wp.me/p1E7sK-oI) ([part3.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part3.md))
 * [contract test](http://wp.me/p1E7sK-ps) ([part4.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part4.md))
-* build image
+* build image - see *deploy on prod*
 * deploy on dev
-* deploy on prod
+* [deploy on prod](http://wp.me/p1E7sK-pV) ([part5.md](https://github.com/gesellix/pipeline-with-gradle-and-docker/blob/master/articles/part5.md))
 
 
 Comments, Questions, Feedback
