@@ -1,0 +1,39 @@
+---
+- name: pull image
+  command: docker pull {{ image_name }}:{{ image_tag }}
+  register: image
+  changed_when: '"Status: Downloaded newer image" in image.stdout'
+
+- name: determine previous image
+  docker_facts: "{{ container_name }}"
+
+- debug: var=running_containers
+
+- name: remove existing container
+  docker:
+    image: '{{ image_name }}'
+    name: '{{ container_name }}'
+    state: absent
+  ignore_errors: yes
+  when: image|changed
+
+- debug: var=container_ports
+
+- name: start container from new image
+  docker:
+    image: '{{ image_name }}:{{ image_tag }}'
+    name: '{{ container_name }}'
+    restart_policy: always
+    ports: "{% for port in container_ports %}{{ port.external }}:{{ port.internal }}/{{ port.protocol }}{% if not loop.last %},{% endif %}{% endfor %}"
+    env: "{{ container_env }}"
+    state: running
+
+- name: wait for service to become available
+  health_check: url=http://localhost:{{ item.external }}{{ item.healthcheck_url }} max_retries=15
+  with_items: container_ports
+  when: "'healthcheck_url' in item.keys()"
+
+- name: remove previous image
+  command: docker rmi {{ running_containers[container_name].image }}
+  when: container_name in running_containers.keys()
+  ignore_errors: yes

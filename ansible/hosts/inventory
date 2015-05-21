@@ -1,0 +1,10 @@
+webapp1          ansible_ssh_host=webapp1.example.dev.hypoport.org
+webapp2          ansible_ssh_host=webapp2.example.dev.hypoport.org
+haproxy          ansible_ssh_host=haproxy.example.dev.hypoport.org
+
+[example-backend-loadbalancer]
+haproxy
+
+[example-backend]
+webapp1
+webapp2

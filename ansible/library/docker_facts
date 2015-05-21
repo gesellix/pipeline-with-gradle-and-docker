@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$1" != "" ] ; then
+  CONTAINER_NAME=$(cat $1)
+else
+  CONTAINER_NAME=""
+fi
+
+if [ "${CONTAINER_NAME}" != "" ] ; then
+  CONTAINERS=${CONTAINER_NAME}
+else
+  CONTAINERS=$(docker ps -q)
+fi
+
+EMPTY_RESPONSE='{"changed": false, "ansible_facts": {"running_containers": {}}}'
+
+if [ "${CONTAINERS}" != "" ] ; then
+
+  # run inspect once to get the exit code
+  docker inspect ${CONTAINERS} &>/dev/null
+
+  if [ $? -ne 0 ] ; then
+      echo -n ${EMPTY_RESPONSE}
+  else
+      docker inspect ${CONTAINERS} 2> /dev/null | \
+        sed 's/\///g' | \
+        jq '[.[] | {key: .Name, value: {image: .Image, container: .Id}}] | from_entries' 2> /dev/null | \
+        jq -a -c -M '{changed: false, ansible_facts: {running_containers: .}}' 2> /dev/null
+  fi
+
+else
+  echo -n ${EMPTY_RESPONSE}
+fi

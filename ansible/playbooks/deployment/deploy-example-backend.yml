@@ -1,0 +1,51 @@
+---
+- name: set up vars
+  hosts: example-backend:example-backend-loadbalancer
+  gather_facts: false
+  tasks:
+    - set_fact:
+        service_ports: {blue: 8080, green: 8090}
+
+- name: extract current stage from loadbalancer
+  hosts: example-backend-loadbalancer[0]
+  tasks:
+    - name: resolve current active stage
+      get_active_stage_fact:
+    - name: determine target stage
+      set_fact: target_stage={{ 'green' if active_stage == 'blue' else 'blue' }}
+
+- name: make target stage available for host example-backend
+  hosts: example-backend
+  vars:
+    target_stage: "{{ hostvars[groups['example-backend-loadbalancer'][0]].target_stage }}"
+  tasks:
+    - name: set target stage
+      set_fact: example_backend__target_stage={{ force_target_stage | default(target_stage) }}
+
+- name: deploy example-backend
+  hosts: example-backend
+  max_fail_percentage: 0
+  serial: 2
+  vars:
+    container_vars_for:
+      blue:
+        - { protocol: tcp, internal: 8080, external: "{{ service_ports.blue }}", healthcheck_url: /example-backend/health }
+      green:
+        - { protocol: tcp, internal: 8080, external: "{{ service_ports.green }}", healthcheck_url: /example-backend/health }
+  roles:
+    - role: docker-service
+      image_name: hypoport/example-backend
+      image_tag: "{{ example_backend_version }}"
+      container_name: "example-backend-{{ example_backend__target_stage }}"
+      container_ports: "{{ container_vars_for[example_backend__target_stage] }}"
+
+- name: switch stage
+  hosts: example-backend-loadbalancer[0]
+  max_fail_percentage: 0
+  roles:
+    - role: haproxy
+      haproxy__target_stage: "{{ target_stage }}"
+      haproxy__healthcheck_uri: "/example-backend/health"
+      haproxy__port_by_stage:
+        blue: "{{ service_ports.blue }}"
+        green: "{{ service_ports.green }}"
