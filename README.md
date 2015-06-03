@@ -24,5 +24,4 @@ Comments, Questions, Feedback
 Please use the comment feature on our articles for questions and feedback or contact us at Twitter [@gesellix](https://twitter.com/gesellix). Thanks!
 
 
-... would you like to improve projects like this one? Well, you can use the GitHub issue tracker or create a pull request.
-If you'd like to improve more than our build scripts: [we're hiring](http://www.hypoport.de/stellenangebote.html) :)
+... would you like to improve projects like this one? Well, you can use the GitHub issue tracker or create a pull request. Thanks!
