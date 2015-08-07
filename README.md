@@ -1,7 +1,7 @@
 Continuous Deployment with Gradle and Docker
 ============================================
 
-Example project for the blog series at [http://blog-it.hypoport.de/](http://wp.me/p1E7sK-mv).
+Example project for the blog series at [http://blog-it.hypoport.de/](http://wp.me/p1E7sK-mv) by [Tobias Gesellchen](https://gesellix.net).
 
 For details about the use cases demonstrated in this project, please read the blog series first. For every article in this series you'll find a dedicated branch. The master branch contains the sources for the
 most recent article.
